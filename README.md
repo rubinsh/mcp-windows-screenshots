@@ -6,7 +6,7 @@
 An MCP (Model Context Protocol) server that enables Claude to access Windows screenshots from WSL2. Perfect for seamlessly sharing screenshots with Claude Code without manual file navigation.
 
 <p align="center">
-  <img src="./demo.gif" alt="MCP Windows Screenshots Demo" width="600">
+  <img src="./demo.gif" alt="MCP Windows Screenshots Demo" width="800">
 </p>
 
 ## Why This Tool?

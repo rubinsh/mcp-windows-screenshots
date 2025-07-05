@@ -113,9 +113,3 @@ npm run build
 ## License
 
 MIT © [rubinsh](https://github.com/rubinsh)
-
-## Related Projects
-
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [Claude Code](https://claude.ai/code)
-- [Playwright MCP](https://github.com/microsoft/playwright-mcp)

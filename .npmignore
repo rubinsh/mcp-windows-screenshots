@@ -1,0 +1,35 @@
+# Source files
+src/
+*.ts
+tsconfig.json
+
+# Development files
+.gitignore
+setup.sh
+.editorconfig
+
+# Build artifacts
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Keep only necessary files
+!dist/
+!cli.js
+!package.json
+!README.md
+!LICENSE
+!CHANGELOG.md

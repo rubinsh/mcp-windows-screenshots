@@ -28,7 +28,7 @@ Simply run this command in your WSL2 terminal:
 claude mcp add windows-screenshots -s user \
   -e "WINDOWS_USERNAME=YourWindowsUsername" \
   -e "MCP_SCREENSHOT_DIRS=/mnt/c/Users/YourWindowsUsername/Pictures/Screenshots" \
-  npx mcp-windows-screenshots@latest
+  -- npx mcp-windows-screenshots@latest
 ```
 
 Replace `YourWindowsUsername` with your actual Windows username.
@@ -41,7 +41,7 @@ For a user named "john" with screenshots in OneDrive:
 claude mcp add windows-screenshots -s user \
   -e "WINDOWS_USERNAME=john" \
   -e "MCP_SCREENSHOT_DIRS=/mnt/c/Users/john/OneDrive/Pictures/Screenshots" \
-  npx mcp-windows-screenshots@latest
+  -- npx mcp-windows-screenshots@latest
 ```
 
 That's it! Restart Claude Code and you're ready to go.

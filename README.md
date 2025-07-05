@@ -50,15 +50,16 @@ That's it! Restart Claude Code and you're ready to go.
 
 Once installed, Claude can use these tools:
 
+### Have Claude look view a Screenshot
+Ask Claude: "Look at the latest screenshot"
+
+Claude will automatically find it and look at the image.
+
 ### List Recent Screenshots
 Ask Claude: "Show me my latest screenshots"
 
 Claude will use `mcp__windows-screenshots__list_screenshots` to display your recent screenshots with timestamps and sizes.
 
-### View a Screenshot
-Ask Claude: "Show me the latest screenshot"
-
-Claude will automatically find and display the image.
 
 ### Check Screenshot Directories
 Ask Claude: "Which directories are you checking for screenshots?"

@@ -5,6 +5,10 @@
 
 An MCP (Model Context Protocol) server that enables Claude to access Windows screenshots from WSL2. Perfect for seamlessly sharing screenshots with Claude Code without manual file navigation.
 
+<a href="https://glama.ai/mcp/servers/@rubinsh/mcp-windows-screenshots">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@rubinsh/mcp-windows-screenshots/badge" alt="Windows Screenshots MCP server" />
+</a>
+
 <p align="center">
   <img src="./demo.gif" alt="MCP Windows Screenshots Demo" width="800">
 </p>
@@ -63,7 +67,6 @@ Claude will automatically find it and look at the image.
 Ask Claude: "Show me my latest screenshots"
 
 Claude will use `mcp__windows-screenshots__list_screenshots` to display your recent screenshots with timestamps and sizes.
-
 
 ### Check Screenshot Directories
 Ask Claude: "Which directories are you checking for screenshots?"

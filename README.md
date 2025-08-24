@@ -18,43 +18,38 @@ When using Claude Code in WSL2, sharing Windows screenshots requires navigating 
 
 No more copy-pasting paths or navigating directories!
 
+### Key Features
+- **Auto-detection**: Automatically detects your Windows Screenshots folder location from the registry
+- **Cross-platform**: Works in both WSL2 and native Windows environments
+- **Smart defaults**: Falls back to common screenshot locations if custom paths aren't found
+- **Zero configuration**: Works out of the box for most users
+
 ## Prerequisites
 
-- Windows 10/11 with WSL2
-- Node.js 18+ in WSL2
+- Windows 10/11 (with or without WSL2)
+- Node.js 18+
 - Claude Code CLI installed
 
 ## Installation
 
-Simply run this command in your WSL2 terminal:
+Run this single command in your terminal (works in WSL2, Windows Terminal, PowerShell, or Command Prompt):
 
 ```bash
-claude mcp add windows-screenshots -s user \
-  -e "WINDOWS_USERNAME=YourWindowsUsername" \
-  -e "MCP_SCREENSHOT_DIRS=/mnt/c/Users/YourWindowsUsername/Pictures/Screenshots" \
-  -- npx mcp-windows-screenshots@latest
-```
-
-Replace `YourWindowsUsername` with your actual Windows username.
-
-### Example
-
-For a user named "john" with screenshots in OneDrive:
-
-```bash
-claude mcp add windows-screenshots -s user \
-  -e "WINDOWS_USERNAME=john" \
-  -e "MCP_SCREENSHOT_DIRS=/mnt/c/Users/john/OneDrive/Pictures/Screenshots" \
-  -- npx mcp-windows-screenshots@latest
+claude mcp add windows-screenshots -s user -- npx mcp-windows-screenshots@latest
 ```
 
 That's it! Restart Claude Code and you're ready to go.
+
+The tool will automatically:
+- Detect your environment (WSL2 or Windows)
+- Find your Windows Screenshots folder from the registry
+- Configure the appropriate paths
 
 ## Usage
 
 Once installed, Claude can use these tools:
 
-### Have Claude look view a Screenshot
+### View a Screenshot
 Ask Claude: "Look at the latest screenshot"
 
 Claude will automatically find it and look at the image.
@@ -62,47 +57,73 @@ Claude will automatically find it and look at the image.
 ### List Recent Screenshots
 Ask Claude: "Show me my latest screenshots"
 
-Claude will use `mcp__windows-screenshots__list_screenshots` to display your recent screenshots with timestamps and sizes.
-
+Claude will display your recent screenshots with timestamps and sizes.
 
 ### Check Screenshot Directories
 Ask Claude: "Which directories are you checking for screenshots?"
 
-Claude will use `mcp__windows-screenshots__list_directories` to show all configured paths.
+Claude will show all configured paths.
 
-## Configuration
+## How It Works
 
-### Environment Variables
-
-- `WINDOWS_USERNAME`: Your Windows username (defaults to WSL username)
-- `MCP_SCREENSHOT_DIRS`: Custom screenshot directory. For multiple directories, separate with semicolons: `/path/1;/path/2`
-
-### Default Search Locations
-
-The tool automatically searches these common locations:
-- `/mnt/c/Users/[username]/Pictures/Screenshots`
-- `/mnt/c/Users/[username]/Pictures`
-- `/mnt/c/Users/[username]/OneDrive/Pictures/Screenshots`
-- `/mnt/c/Users/[username]/OneDrive/Pictures 2/Screenshots 1`
-- `/mnt/c/Users/[username]/Documents/Screenshots`
-- `/mnt/c/Users/[username]/Desktop`
-- `/mnt/c/Users/[username]/AppData/Local/Temp`
+The tool automatically:
+1. **Detects your environment** (WSL2 vs native Windows)
+2. **Queries Windows registry** for your actual Screenshots folder location
+3. **Searches common locations** as fallback:
+   - Your configured Screenshots folder (from Windows settings)
+   - Pictures/Screenshots
+   - OneDrive Pictures/Screenshots
+   - Desktop
+   - Documents/Screenshots
+   - Temp folders
 
 ## Troubleshooting
 
 ### No screenshots found
-1. Verify your Windows username is correct
-2. Ask Claude to "list screenshot directories" to see which paths are being searched
-3. Ensure your screenshots are saved in one of the searched directories
-4. Set a custom directory with `MCP_SCREENSHOT_DIRS` if needed
+1. Ask Claude to "list screenshot directories" to see which paths are being searched
+2. Ensure your screenshots are saved in one of the searched directories
+3. If your screenshots are in a custom location, see Advanced Configuration below
 
 ### Tool not available
 1. Restart Claude Code after installation
 2. Run `claude mcp list` to verify the server is installed
 3. Ensure you used `-s user` when adding the server
 
-### Environment variables not working
-Make sure you're using the `claude mcp add` command with `-e` flags as shown in the installation section.
+## Advanced Configuration
+
+### Custom Screenshot Directories
+If your screenshots are saved in a non-standard location, you can specify custom directories:
+
+#### WSL2 with custom paths:
+```bash
+claude mcp add windows-screenshots -s user \
+  -e "MCP_SCREENSHOT_DIRS=/mnt/c/Users/john/CustomFolder;/mnt/c/Users/john/Desktop" \
+  -- npx mcp-windows-screenshots@latest
+```
+
+#### Windows with custom paths:
+```bash
+claude mcp add windows-screenshots -s user -e "MCP_SCREENSHOT_DIRS=C:\Users\john\CustomFolder;C:\Users\john\Desktop" -- npx mcp-windows-screenshots@latest
+```
+
+### Environment Variables
+- `WINDOWS_USERNAME`: Override the auto-detected Windows username
+- `MCP_SCREENSHOT_DIRS`: Specify custom screenshot directories (semicolon-separated for multiple paths)
+
+### Manual Username Configuration
+If the auto-detection doesn't find the correct username:
+
+#### WSL2:
+```bash
+claude mcp add windows-screenshots -s user \
+  -e "WINDOWS_USERNAME=YourWindowsUsername" \
+  -- npx mcp-windows-screenshots@latest
+```
+
+#### Windows:
+```bash
+claude mcp add windows-screenshots -s user -e "WINDOWS_USERNAME=YourWindowsUsername" -- npx mcp-windows-screenshots@latest
+```
 
 ## Development
 

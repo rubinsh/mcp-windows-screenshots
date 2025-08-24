@@ -6,10 +6,12 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
-import { readFile, stat } from 'fs/promises';
+import { readFile, stat, access } from 'fs/promises';
 import { glob } from 'glob';
 import path from 'path';
 import os from 'os';
+import { spawnSync } from 'child_process';
+import { existsSync } from 'fs';
 
 const server = new Server(
   {
@@ -23,21 +25,136 @@ const server = new Server(
   }
 );
 
+// Detect environment (WSL, Windows, or Linux)
+function detectEnvironment(): { type: 'windows' | 'wsl' | 'linux', pathPrefix: string } {
+  const platform = process.platform;
+  
+  if (platform === 'win32') {
+    return { type: 'windows', pathPrefix: '' };
+  } else if (platform === 'linux') {
+    // Check if WSL
+    const isWSL = existsSync('/proc/sys/fs/binfmt_misc/WSLInterop') || 
+                  Boolean(process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP);
+    return isWSL 
+      ? { type: 'wsl', pathPrefix: '/mnt/c' }
+      : { type: 'linux', pathPrefix: '' };
+  }
+  return { type: 'linux', pathPrefix: '' };
+}
+
+// Query Windows registry for Screenshots folder location
+function getWindowsScreenshotPath(): string | null {
+  const env = detectEnvironment();
+  
+  try {
+    if (env.type === 'wsl') {
+      // Use reg.exe from WSL
+      const result = spawnSync('reg.exe', [
+        'query',
+        'HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders',
+        '/v', '{B7BEDE81-DF94-4682-A7D8-57A52620B86F}'
+      ], {
+        encoding: 'utf8',
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'ignore'] // Suppress stderr
+      });
+      
+      if (result.status === 0 && result.stdout) {
+        // Parse the output to extract the path
+        const lines = result.stdout.split('\n');
+        for (const line of lines) {
+          if (line.includes('{B7BEDE81-DF94-4682-A7D8-57A52620B86F}')) {
+            const parts = line.split('REG_EXPAND_SZ');
+            if (parts.length > 1) {
+              let path = parts[1].trim();
+              // Expand %USERPROFILE%
+              const windowsUsername = process.env.WINDOWS_USERNAME || os.userInfo().username;
+              path = path.replace('%USERPROFILE%', `C:\\Users\\${windowsUsername}`);
+              // Convert to WSL path
+              return path.replace('C:\\', '/mnt/c/').replace(/\\/g, '/');
+            }
+          }
+        }
+      }
+    } else if (env.type === 'windows') {
+      // On native Windows, use reg.exe directly (no shell needed)
+      const result = spawnSync('reg.exe', [
+        'query',
+        'HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders',
+        '/v',
+        '{B7BEDE81-DF94-4682-A7D8-57A52620B86F}'
+      ], {
+        encoding: 'utf8',
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'ignore'] // Suppress stderr
+      });
+      
+      if (result.status === 0 && result.stdout) {
+        const lines = result.stdout.split('\n');
+        for (const line of lines) {
+          if (line.includes('{B7BEDE81-DF94-4682-A7D8-57A52620B86F}')) {
+            const parts = line.split('REG_EXPAND_SZ');
+            if (parts.length > 1) {
+              let path = parts[1].trim();
+              // Expand environment variables
+              path = path.replace('%USERPROFILE%', process.env.USERPROFILE || `C:\\Users\\${os.userInfo().username}`);
+              return path;
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // Registry query failed silently, will use defaults
+    // This is expected in some environments (e.g., containers, CI/CD)
+  }
+  
+  return null;
+}
+
 // Default screenshot directories
 const getScreenshotDirectories = (): string[] => {
   const username = os.userInfo().username;
   const windowsUsername = process.env.WINDOWS_USERNAME || username;
+  const env = detectEnvironment();
   
-  return [
-    `/mnt/c/Users/${windowsUsername}/Pictures/Screenshots`,
-    `/mnt/c/Users/${windowsUsername}/Pictures`,
-    `/mnt/c/Users/${windowsUsername}/OneDrive/Pictures/Screenshots`,
-    `/mnt/c/Users/${windowsUsername}/Documents/Screenshots`,
-    `/mnt/c/Users/${windowsUsername}/Desktop`,
-    // Temp directories where some tools save screenshots
-    `/mnt/c/Users/${windowsUsername}/AppData/Local/Temp`,
-    `/mnt/c/Windows/Temp`,
-  ];
+  // Try to get the actual Screenshots folder from registry first
+  const registryPath = getWindowsScreenshotPath();
+  const directories: string[] = [];
+  
+  if (registryPath) {
+    directories.push(registryPath);
+  }
+  
+  // Add default paths based on environment
+  if (env.type === 'wsl') {
+    // WSL paths
+    directories.push(
+      `/mnt/c/Users/${windowsUsername}/Pictures/Screenshots`,
+      `/mnt/c/Users/${windowsUsername}/Pictures`,
+      `/mnt/c/Users/${windowsUsername}/OneDrive/Pictures/Screenshots`,
+      `/mnt/c/Users/${windowsUsername}/OneDrive/Pictures 2/Screenshots 1`,
+      `/mnt/c/Users/${windowsUsername}/Documents/Screenshots`,
+      `/mnt/c/Users/${windowsUsername}/Desktop`,
+      `/mnt/c/Users/${windowsUsername}/AppData/Local/Temp`,
+      `/mnt/c/Windows/Temp`
+    );
+  } else if (env.type === 'windows') {
+    // Native Windows paths
+    directories.push(
+      `C:\\Users\\${windowsUsername}\\Pictures\\Screenshots`,
+      `C:\\Users\\${windowsUsername}\\Pictures`,
+      `C:\\Users\\${windowsUsername}\\OneDrive\\Pictures\\Screenshots`,
+      `C:\\Users\\${windowsUsername}\\OneDrive\\Pictures 2\\Screenshots 1`,
+      `C:\\Users\\${windowsUsername}\\Documents\\Screenshots`,
+      `C:\\Users\\${windowsUsername}\\Desktop`,
+      `C:\\Users\\${windowsUsername}\\AppData\\Local\\Temp`,
+      `C:\\Windows\\Temp`
+    );
+  }
+  
+  // Remove duplicates
+  return [...new Set(directories)];
 };
 
 // Get custom directories from environment variable

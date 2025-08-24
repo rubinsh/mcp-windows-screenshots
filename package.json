@@ -1,6 +1,6 @@
 {
   "name": "mcp-windows-screenshots",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for accessing Windows screenshots from WSL2",
   "main": "dist/index.js",
   "type": "module",

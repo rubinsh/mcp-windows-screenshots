@@ -5,15 +5,21 @@
 
 An MCP (Model Context Protocol) server that enables Claude to access Windows screenshots from WSL2. Perfect for seamlessly sharing screenshots with Claude Code without manual file navigation.
 
+<a href="https://glama.ai/mcp/servers/@rubinsh/mcp-windows-screenshots">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@rubinsh/mcp-windows-screenshots/badge" alt="Windows Screenshots MCP server" />
+</a>
+
 <p align="center">
   <img src="./demo.gif" alt="MCP Windows Screenshots Demo" width="800">
 </p>
 
 ## Why This Tool?
 
-When using Claude Code in WSL2, sharing Windows screenshots requires navigating complex file paths like `/mnt/c/Users/...`. This tool simplifies the process to just:
+When using Claude Code cli in WSL2 or in Cursor/VSCode, sharing Windows screenshots requires navigating complex file paths like `/mnt/c/Users/...` or dragging the image to the terminal.
+Also, what if want to share the last 4 screenshots with Claude? this can become very cubersome. 
+This tool simplifies the process to just:
 1. Take a screenshot on Windows (Win+Shift+S)
-2. Ask Claude to show your latest screenshot
+2. Ask Claude to show your latest screenshot/s
 3. Claude instantly accesses and displays it
 
 No more copy-pasting paths or navigating directories!
